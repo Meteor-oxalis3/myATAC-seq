@@ -1,0 +1,57 @@
+from os.path import join, abspath
+from glob import glob # 通配符匹配路径
+
+# 命令行传参
+case_prefix = config["case_prefix"]
+control_prefix = config["control_prefix"]
+mycores = config["cores"]
+
+case1_dir = abspath(config["case1"])
+case2_dir = abspath(config["case2"])
+
+control1_dir = abspath(config["control1"])
+control2_dir = abspath(config["control2"])
+
+genome = abspath(config["genome"])
+genome_index = abspath(config["genome_index"])
+
+motifs = abspath(config["motifs"])
+
+# 二进制文件
+idr_bin = "/public/workspace/stu22230111/micromamba/envs/idr/bin/idr"
+
+# 路径
+case_idr_dir = join(case_prefix, "idr")
+control_idr_dir = join(control_prefix, "idr")
+bedtools_merge_dir = "peak_merge"
+samtools_merge_dir = "bam_merge"
+case_tobias_dir = join(case_prefix, "tobias")
+control_tobias_dir = join(control_prefix, "tobias")
+tobias_BINDetect_dir = "footprinting"
+
+
+## 参数
+idr_threshold = float(0.05)
+# bedtools_merge 去除线粒体 DNA
+MT_DNA = "'(chrM|chrMT|M|MT|Mito)'"
+
+# 汇总
+rule all:
+    input:
+        # f"{case_tobias_dir}/{case_prefix}_corrected.bw",
+        # f"{control_tobias_dir}/{control_prefix}_corrected.bw",
+        # f"{case_tobias_dir}/{case_prefix}_footprints.bw",
+        # f"{control_tobias_dir}/{control_prefix}_footprints.bw",
+        f"{tobias_BINDetect_dir}/bindetect_results.txt"
+
+
+include: "rules/idr_case.smk",
+include: "rules/idr_control.smk",
+include: "rules/bedtools_merge.smk"
+include: "rules/samtools_merge_case.smk"
+include: "rules/samtools_merge_control.smk"
+include: "rules/tobias_ATACorrect_case.smk"
+include: "rules/tobias_ATACorrect_control.smk"
+include: "rules/tobias_ScoreBigwig_case.smk"
+include: "rules/tobias_ScoreBigwig_control.smk"
+include: "rules/tobias_BINDetect.smk"

@@ -1,0 +1,76 @@
+# https://meteor-oxalis3.com/NGS/2anb5jfk/
+# 实现单样本到 call peak 的一条龙服务流程
+from os.path import join, abspath
+
+# 命令行传参
+prefix = config["prefix"]
+mycores = config["cores"]
+fastq_1_dir = abspath(config["fastq1"])
+fastq_2_dir = abspath(config["fastq2"])
+bwa_index_dir = config["bwa_index"]
+blacklist = abspath(config["blacklist"])
+# /public/workspace/shaojf/Course/NGS/Reference/ENCODE/blacklist.v2/hg38-blacklist.v2.bed
+
+# 各软件的结果输出路径
+# 原始数据
+data_dir = join(prefix,"raw_data")
+# 原始数据 fastqc
+raw_fastqc_dir = join(prefix,"raw_fastqc")
+# fastp
+fastp_dir = join(prefix, "fastp")
+# 质控后数据 fastqc
+trimmed_fastqc_dir = join(prefix, "trimmed_fastqc")
+# # MultiQC
+multiqc_dir = join(prefix, "multiqc")
+# bwa
+bwa_dir = join(prefix, "bwa")
+# samtools
+samtools_dir = join(prefix, "samtools")
+# alignmentSieve (from deeptools)
+alignmentSieve_dir = join(prefix, "alignmentSieve")
+# MACS3
+macs3_dir = join(prefix, "macs3")
+
+############################################################
+## 参数
+# fastp 参数
+cut_mean_quality = 20
+length_required = 36
+
+# alignmentSieve (from deeptools) 参数
+minMappingQuality = 10
+
+# MACS3 callpeak 参数
+gsize = "hs"
+qvalue = "0.01"
+
+############################################################
+# 汇总
+rule all:
+    input:
+        # fastqc_raw
+        # f"{raw_fastqc_dir}/{prefix}_1_fastqc.html",
+        # f"{raw_fastqc_dir}/{prefix}_1_fastqc.zip",
+        # f"{raw_fastqc_dir}/{prefix}_2_fastqc.html",
+        # f"{raw_fastqc_dir}/{prefix}_2_fastqc.zip",
+        # # fastqc_trimmed
+        # f"{trimmed_fastqc_dir}/fastp_{prefix}_1_fastqc.html",
+        # f"{trimmed_fastqc_dir}/fastp_{prefix}_1_fastqc.zip",
+        # f"{trimmed_fastqc_dir}/fastp_{prefix}_2_fastqc.html",
+        # f"{trimmed_fastqc_dir}/fastp_{prefix}_2_fastqc.zip",
+        # multiqc
+        f"{multiqc_dir}/multiqc_report.html",
+        # macs3
+        f"{macs3_dir}/{prefix}_peaks.narrowPeak",
+        f"{macs3_dir}/{prefix}_peaks.xls",
+        f"{macs3_dir}/{prefix}_summits.bed",
+
+include: "rules/link.smk"
+include: "rules/fastqc_raw.smk"
+include: "rules/fastp.smk"
+include: "rules/fastqc_trimmed.smk"
+include: "rules/multiqc.smk"
+include: "rules/bwa.smk"
+include: "rules/samtools.smk"
+include: "rules/alignmentSieve.smk"
+include: "rules/macs3.smk"

@@ -18,7 +18,7 @@ genome_index = abspath(config["genome_index"])
 motifs = abspath(config["motifs"])
 
 # 二进制文件
-idr_bin = "/public/workspace/stu22230111/micromamba/envs/idr/bin/idr"
+idr_bin = "/micromamba/envs/idr/bin/idr"
 
 # 路径
 case_idr_dir = join(case_prefix, "idr")

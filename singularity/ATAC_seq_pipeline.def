@@ -1,0 +1,39 @@
+BootStrap: docker
+From: dockerhub.dudleya.cc/debian:bookworm-slim
+
+%post
+    # 更新系统并安装依赖
+    apt update && \
+    apt install -y --no-install-recommends ca-certificates && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/* && \
+
+    # 初始化 micromamba 并创建虚拟环境
+    bash -c "
+    micromamba shell init -s bash -r /micromamba
+    source ~/.bashrc
+    micromamba env create -f /root/env_ATAC_seq.yml
+    micromamba env create -f /root/env_idr.yml
+    micromamba clean --packages
+    micromamba clean --all
+    rm /root/*.yml
+    "
+
+    # 设置权限
+    find /micromamba -type d -print0 | xargs -0 -P 10 chmod 755
+    find /micromamba -type f -print0 | xargs -0 -P 10 chmod 755
+
+%files
+    ./bin/micromamba /bin/micromamba
+    ./debian.sources /etc/apt/sources.list.d/
+    ./env_ATAC_seq.yml /root/env_ATAC_seq.yml
+    ./env_idr.yml /root/env_idr.yml
+
+%environment
+    export PATH="/micromamba/envs/idr/bin:/micromamba/envs/ATAC_seq/bin:/usr/local/bin:$PATH"
+    export SINGULARITY_SHELL="/bin/bash"
+    export LC_ALL=C
+    export LANG=C
+
+%runscript
+    exec /bin/bash "$@"

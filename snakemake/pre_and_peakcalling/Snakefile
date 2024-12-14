@@ -7,6 +7,7 @@ prefix = config["prefix"]
 mycores = config["cores"]
 fastq_1_dir = abspath(config["fastq1"])
 fastq_2_dir = abspath(config["fastq2"])
+genome_index = abspath(config["genome_index"])
 bwa_index_dir = config["bwa_index"]
 blacklist = abspath(config["blacklist"])
 # /public/workspace/shaojf/Course/NGS/Reference/ENCODE/blacklist.v2/hg38-blacklist.v2.bed
@@ -61,9 +62,11 @@ rule all:
         # multiqc
         f"{multiqc_dir}/multiqc_report.html",
         # macs3
+        f"{alignmentSieve_dir}/ATACshifted_{prefix}_sorted.bam",
         f"{macs3_dir}/{prefix}_peaks.narrowPeak",
         f"{macs3_dir}/{prefix}_peaks.xls",
         f"{macs3_dir}/{prefix}_summits.bed",
+        f"{macs3_dir}/{prefix}_treat_pileup.bw"
 
 include: "rules/link.smk"
 include: "rules/fastqc_raw.smk"
